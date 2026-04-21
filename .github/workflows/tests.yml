@@ -18,30 +18,35 @@ jobs:
       API_KEY: ${{ secrets.API_KEY }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip' 
+          cache: 'pip'
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
-      - name: Run tests (pytest + Allure results)
+      - name: Run tests
+        run: pytest --alluredir=allure-results
+
+      # ✅ СТАБІЛЬНА установка Allure
+      - name: Install Allure
         run: |
-          pytest --alluredir=allure-results
+          sudo apt-get update
+          sudo apt-get install -y default-jre
+          wget https://github.com/allure-framework/allure2/releases/download/2.39.0/allure-2.39.0.tgz
+          tar -zxvf allure-2.39.0.tgz
+          sudo mv allure-2.39.0 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
 
       - name: Generate Allure report
-        uses: simple-elf/allure-report-action@v1.7
-        with:
-          allure_results: allure-results
-          allure_report: allure-report
+        run: allure generate allure-results -o allure-report --clean
 
-      - name: Upload Allure report artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
@@ -55,5 +60,5 @@ jobs:
         with:
           path: allure-report
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to Pages
         uses: actions/deploy-pages@v4
