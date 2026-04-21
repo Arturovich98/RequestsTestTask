@@ -30,7 +30,6 @@ jobs:
       - name: Run tests
         run: pytest --alluredir=allure-results
 
-      # ✅ СТАБІЛЬНА установка Allure
       - name: Install Allure
         run: |
           sudo apt-get update
